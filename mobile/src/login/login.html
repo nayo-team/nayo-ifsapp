@@ -1,0 +1,33 @@
+<!-- <div class="login jumbotron center-block">
+  <h1>Login</h1>
+  <form role="form" (submit)="login($event, username.value, password.value)">
+  <div class="form-group">
+    <label for="username">Username</label>
+    <input type="text" #username class="form-control" id="username" placeholder="Username">
+  </div>
+  <div class="form-group">
+    <label for="password">Password</label>
+    <input type="password" #password class="form-control" id="password" placeholder="Password">
+  </div>
+  <button type="submit" class="btn btn-default">Submit</button>
+    <a href="/signup">Click here to Signup</a>
+</form>
+</div> -->
+
+<div class="login-page">
+  <div class="form">
+    <form class="register-form">
+      <input type="text" placeholder="name"/>
+      <input type="password" placeholder="password"/>
+      <input type="text" placeholder="email address"/>
+      <button>create</button>
+      <p class="message">Already registered? <a href="/login">Sign In</a></p>
+    </form>
+    <form role="form" class="login-form" (submit)="login($event, username.value, password.value)">
+      <input type="text" #username id="username" placeholder="username"/>
+      <input type="password" #password id="password" placeholder="password"/>
+      <button type="submit">login</button>
+      <p class="message">Not registered? <a href="/signup">Create an account</a></p>
+    </form>
+  </div>
+</div>

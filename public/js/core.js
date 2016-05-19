@@ -17,7 +17,7 @@ function mainController($scope, $http, $window){
                 console.log('success login:' + data + '<br>');
                 console.log(data);
             
-                //$window.location.href = '/home'; //reroute
+                $window.location.href = '/home'; //reroute
             })
             
             .error(function(data){
@@ -36,7 +36,7 @@ function mainController($scope, $http, $window){
                 console.log('success login' + data + '<br>');
                 console.log(data);
             
-                $window.location.href = '/home'; //reroute
+                //$window.location.href = '/home'; //reroute
             })
             
             .error(function(data){

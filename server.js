@@ -60,7 +60,7 @@ app.get('/', function (req, res) {
 
     //TODO: this respond is for webapps, if request is for mobileapps send routes notification instead
     if(sess.username){
-        res.redicrect('/home'); //redirect to /home
+        res.redirect('/home'); //redirect to /home
     } else {
         
         //res.sendFile(__dirname +'/public/index.html'); // load single view html page (angular will handle front end page)

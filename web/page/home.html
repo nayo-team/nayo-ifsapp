@@ -1,7 +1,35 @@
-<html>
-<head>
-</head>
-<body>
-	<h1>Welcome to IFS Home Screen!</h1>
-</body>
+<!doctype html>
+
+<html ng-app="homePage">
+	<head>
+		<meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Optimize mobile viewport -->
+        <title>IFS Home</title>
+        
+        <link rel="stylesheet" href="./css/bootstrap.min.css"><!-- load bootstrap -->
+        <style>
+            html                    { overflow-y:scroll; }
+            body                    { padding-top:50px; }
+        </style>
+        <script src="./js/jquery.min.js"></script><!-- load jquery -->
+        <script src="./js/angular.min.js"></script><!-- load angular -->
+        <script src="./js/home.js"></script>
+	</head>
+	<body ng-controller="homeController">
+		<div class="container">
+            <div class="jumbotron text-center">
+                <h2>IFS Login</h2>
+				<h3>Welcome to IFS Home Screen!</h3>
+            </div>
+        </div>
+		<div class="container">
+			<button type="button" class="btn btn-primary btn-lg" ng-click="getLoginStatus()">Login Status</button>
+			<label for="Message = ">{{loginStatus}}</label>
+        </div>
+		
+		<div class="container">
+			<button type="button" class="btn btn-primary btn-lg" ng-click="submitLogout()">Logout</button>
+		</div>
+		
+	</body>
 </html>

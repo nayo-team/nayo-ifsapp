@@ -5,33 +5,32 @@ var oracledb = require('oracledb'); // node-oracledb
 var bodyParser = require('body-parser'); // pull infommation from HTML GET and POST 
 //var cookieParser = require('cookie-parser'); // implement cookies
 var morgan = require('morgan'); //logging purpose
-
+//var jwt = require('express-jwt'); // token authentication, TODO: if this is run, do disabled session
+var jwt = require('jsonwebtoken');
+var config = require('./config');
 var app = express();
-var connString = "192.169.255.134:1521/RACE81";
 
+
+
+var connString = config.connString;
 var sess; //hold session
+
+
 // ------------------
 // ---- APP Config ----
 
-//--- allow CORS ---
-/*var allowCrossDomain = function(req, res, next) {
-    if ('OPTIONS' == req.method) {
-      res.header('Access-Control-Allow-Origin', '*');
-      res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
-      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
-      res.send(200);
-    }
-    else {
-      next();
-    }
-}; 
-app.use(allowCrossDomain); 
-*/
+//------ JWT ---
+app.set('appSecret', config.secret);
 
-//allow cross domain
+//-----------------------
+
+"use strict"; //securing injection from eval()
+
+//--- allow CORS ---
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
   next();
 });
 
@@ -93,66 +92,8 @@ app.get('/login', function (req, res) {
 });
 
 
-app.get('/home', function(req, res){
-    // check session
-    sess = req.session;
-    console.log('---home request---');
-    console.log(sess);
-        
-    //check session
-    if(sess.username){
-        if(sess.mode == 'mobile'){ //mobile apps
-            res.set('Content-Type', 'application/json');
-            res.status(200).send(JSON.stringify({
-                status: 200,
-                message: 'Authentication Ok.',
-                detailed_message: 'Login process is successful / session still alive.',
-                data: 'ok',
-                route: './home/home.html'
-            }));
-        } else{ //web apps
-           //res.sendFile(__dirname+'/public/src/home/home.html');
-            res.sendFile(__dirname+'/web/page/home.html');
-        }
-    }else{
-        res.redirect('/');
-    }
-});
-
-
-app.get('/api/logout', function(req, res){
-    //logout
-    sess = req.session;
-    
-    if(sess.mode == 'mobile'){ // mobile version
-        req.session.destroy(function(err) {
-          if(err) {
-            console.log(err);
-          } else {
-            res.set('Content-Type', 'application/json');
-            res.status(200).send(JSON.stringify({
-                status: 200,
-                message: 'Logout Ok.',
-                detailed_message: 'Logout process is successful.',
-                data: 'ok',
-                route: './login/login.html'
-            }));
-          }
-        });
-        
-    } else { //web version
-        req.session.destroy(function(err) {
-          if(err) {
-            console.log(err);
-          } else {
-            res.redirect('/');
-          }
-        });
-    }
-});
-
 app.get('/api/login/status', function(req, res){
-    // check session
+    // check session, TODO: check is token expired?
     sess = req.session;
     console.log('---status request---');
     console.log(sess);
@@ -178,6 +119,12 @@ app.get('/api/login/status', function(req, res){
         }));
     }
 });
+
+//----- JWT MIDDLEWARE HERE---------------------
+// TODO: implement JWT Middleware here
+//       to protect routes below
+//
+//--------------------------------------------------
 
 
 // ---- DB Related Handler Functions  ----
@@ -236,7 +183,13 @@ app.get('/api/login/:USERNAME/:PASSWORD/:MODE',  function(req, res){
                 sess.mode = req.params.MODE;
                 console.log('---login process--');
                 console.log(sess);
-
+                
+                //set token
+                var token = jwt.sign({username : sess.username}, app.get('appSecret'), {
+                    expiresIn: '24h' // expires in 24 hours
+                });
+                
+                console.log(token);
                 
                 //---- return response
                 //-return json result
@@ -246,7 +199,8 @@ app.get('/api/login/:USERNAME/:PASSWORD/:MODE',  function(req, res){
                     message: 'Authentication OK.',
                     detailed_message: 'Login process is successful.',
                     data: result,
-                    route: './home/home.html'
+                    route: './home/home.html',
+                    token: token
                 }));
 
                 //return page instead
@@ -327,7 +281,13 @@ app.post('/api/login',  function(req, res){
                 sess.mode = req.body.MODE;
                 console.log('---login process--');
                 console.log(sess);
-
+                
+                //set token
+                 var token = jwt.sign({username : sess.username}, app.get('appSecret'), {
+                    expiresIn: '24h' // expires in 24 hours
+                });
+                
+                console.log(token);
                 
                 //---- return response
                 //-return json result
@@ -337,7 +297,8 @@ app.post('/api/login',  function(req, res){
                     message: 'Authentication OK.',
                     detailed_message: 'Login process is successful.',
                     data: result,
-                    route: './home/home.html'
+                    route: './home/home.html',
+                    token: token
                 }));
 
                 //return page instead
@@ -364,6 +325,66 @@ app.post('/api/login',  function(req, res){
      }  
     
 });
+
+app.get('/home', function(req, res){
+    // check session
+    sess = req.session;
+    console.log('---home request---');
+    console.log(sess);
+        
+    //check session
+    if(sess.username){
+        if(sess.mode == 'mobile'){ //mobile apps
+            res.set('Content-Type', 'application/json');
+            res.status(200).send(JSON.stringify({
+                status: 200,
+                message: 'Authentication Ok.',
+                detailed_message: 'Login process is successful / session still alive.',
+                data: 'ok',
+                route: './home/home.html'
+            }));
+        } else{ //web apps
+           //res.sendFile(__dirname+'/public/src/home/home.html');
+            res.sendFile(__dirname+'/web/page/home.html');
+        }
+    }else{
+        res.redirect('/');
+    }
+});
+
+
+app.get('/api/logout', function(req, res){
+    //logout
+    sess = req.session;
+    
+    if(sess.mode == 'mobile'){ // mobile version
+        req.session.destroy(function(err) {
+          if(err) {
+            console.log(err);
+          } else {
+            res.set('Content-Type', 'application/json');
+            res.status(200).send(JSON.stringify({
+                status: 200,
+                message: 'Logout Ok.',
+                detailed_message: 'Logout process is successful.',
+                data: 'ok',
+                route: './login/login.html'
+            }));
+          }
+        });
+        
+    } else { //web version
+        req.session.destroy(function(err) {
+          if(err) {
+            console.log(err);
+          } else {
+            res.redirect('/');
+          }
+        });
+    }
+});
+
+
 
 // ----- End IFS LOGIN -----
 

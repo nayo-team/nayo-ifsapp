@@ -10,7 +10,9 @@ function mainController($scope, $http, $window){
     $scope.submitLogin = function(){
         $scope.message = ''; //clear message
         
+        /*
         $http.get(rootURL+'/api/login/'+$scope.username+'/'+$scope.password+'/web')
+        
             .success(function(data){
                
                 //$scope.message = data;
@@ -18,6 +20,33 @@ function mainController($scope, $http, $window){
                 console.log(data);
             
                 $window.location.href = '/home'; //reroute
+            })
+            
+            .error(function(data){
+                $scope.message = data;
+                console.log('error login' + data);
+            });
+        */
+        
+        var data = JSON.stringify({
+            username: $scope.username,
+            password: $scope.password,
+            mode: 'web'
+        });
+        
+        var config = {
+            headers : {
+                'Content-Type': 'application/json'
+            }
+        }
+        
+        $http.post(rootURL+'/api/login', data, config)
+            .success(function(data, status, header, config){
+                console.log('success login:' + data + '<br>');
+                console.log(data);
+
+                $window.location.href = '/home'; //reroute
+
             })
             
             .error(function(data){

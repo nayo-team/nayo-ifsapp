@@ -4,9 +4,10 @@
   "main": "server.js",
   "dependencies": {
     "express": "4.13.x",
+    "express-jwt": "^3.4.0",
     "express-session": "1.13.x",
+    "jsonwebtoken": "^7.0.0",
     "morgan": "1.7.x",
     "oracledb": "1.8.0"
- 
   }
 }
